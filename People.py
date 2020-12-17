@@ -7,7 +7,7 @@ class People:
     def lista_amigos(_id):
         conjunto = Friends.conjunto_amigos(_id)
         lista = list(conjunto)
-        lista.sort(key=_id)
+        lista.sort()
         return lista
 
     @staticmethod
@@ -33,6 +33,7 @@ class People:
         #Quitamos a la misma persona
 
         listadispo = list(conjuntodis)
+        listadispo.sort()
         return listadispo
 
     def __init__(self, _id):
@@ -56,19 +57,17 @@ class People:
     def get_lastname(self):
         return self.lastname
 
-    def delete(self):
-        client = pymongo.MongoClient("mongodb+srv://Gestionpymongo:Gestionpymongo@cluster0.iixvr.mongodb.net"
-                                     "/Gestiondb?retryWrites=true&w=majority")
-        mydb = client["Gestiondb"]
-        mycol = mydb["People"]
-        query = {"_id": self._id}
-        mycol.delete_one(query)
-        self._id = None
-        self.firstname = None
-        self.lastname = None
-
     def __str__(self):
         return str(self._id) + "; " + self.firstname + "; " + self.lastname
+
+    def __lt__(self, other):
+        return self.get_id() < other.get_id()
+
+    def __eq__(self, other):
+        return self.get_id() == other.get_id()
+
+    def __hash__(self):
+        return self.get_id()
 
 
 class Friends:
@@ -99,7 +98,7 @@ class Friends:
         mydb = client["Gestiondb"]
         mycol = mydb["Friends"]
 
-        query = {"_id1": _id1, "_id2": _id2}
+        query = {"$or": [{"_id1": _id1, "_id2": _id2}, {"_id1": _id2, "_id2": _id1}]}
         mydoc = mycol.find_one(query)
 
         if mydoc is None:
@@ -122,9 +121,20 @@ class Friends:
                                      "/Gestiondb?retryWrites=true&w=majority")
         mydb = client["Gestiondb"]
         mycol = mydb["Friends"]
-        query = {"_id1": self._id1, "_id2": self._id2}
+        query = {"$or": [{"_id1": self._id1, "_id2": self._id2}, {"_id1": self._id2, "_id2": self._id1}]}
         mycol.delete_one(query)
         self._id1 = None
         self._id2 = None
+
+
+amigos1 = People.lista_amigos(1)
+print("Panas: ")
+for x in amigos1:
+    print(x)
+
+print("Now disp: ")
+disp1 = People.lista_disponibles(1)
+for x in disp1:
+    print(x)
 
 
