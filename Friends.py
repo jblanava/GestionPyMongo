@@ -1,7 +1,29 @@
 import pymongo
 
+from People import People
+
 
 class Friends:
+
+    @staticmethod
+    def conjunto_amigos(_id):
+        client = pymongo.MongoClient("mongodb+srv://Gestionpymongo:Gestionpymongo@cluster0.iixvr.mongodb.net"
+                                     "/Gestiondb?retryWrites=true&w=majority")
+        mydb = client["Gestiondb"]
+        mycol = mydb["Friends"]
+        query = {"$or": [{"_id1": _id}, {"_id2": _id}]}
+        mydoc = mycol.find(query)
+        res = set()
+
+        for x in mydoc:
+            if x.get("_id1") == _id:
+                p = People(x.get("_id2"))
+                res.add(p)
+            else:
+                p = People(x.get("_id1"))
+                res.add(p)
+
+        return res
 
     def __init__(self, _id1, _id2):
         client = pymongo.MongoClient("mongodb+srv://Gestionpymongo:Gestionpymongo@cluster0.iixvr.mongodb.net"

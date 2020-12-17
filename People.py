@@ -1,7 +1,38 @@
 import pymongo
 
+from Friends import Friends
+
 
 class People:
+
+    @staticmethod
+    def lista_amigos(_id):
+        conjunto = Friends.conjunto_amigos(_id)
+        lista = list(conjunto)
+        #lista.sort(_id)
+        return lista
+
+    @staticmethod
+    def lista_disponibles(_id):
+        client = pymongo.MongoClient("mongodb+srv://Gestionpymongo:Gestionpymongo@cluster0.iixvr.mongodb.net"
+                                     "/Gestiondb?retryWrites=true&w=majority")
+        mydb = client["Gestiondb"]
+        mycol = mydb["People"]
+        mydoc = mycol.find()
+        conjunto = set()
+
+        for x in mydoc:
+            p = People(x.get("_id"))
+            conjunto.add(p)
+
+        conjuntoamigos = Friends.conjunto_amigos(_id)
+        conjuntodis = conjunto.difference(conjuntoamigos)
+
+        #Quitamos a la misma persona
+        conjuntodis.remove(People(_id))
+
+        listadispo = list(conjuntodis)
+        return listadispo
 
     def __init__(self, _id):
         client = pymongo.MongoClient("mongodb+srv://Gestionpymongo:Gestionpymongo@cluster0.iixvr.mongodb.net"
