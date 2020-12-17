@@ -1,18 +1,13 @@
 import pymongo
 
 
-#mydict = { "_id": "1","name": "Peporro", "address": "lomejon" }
-#x=mycol.insert_one(mydict)
-
-
-
-class Persona:
+class People:
 
     def __init__(self, _id):
         client = pymongo.MongoClient("mongodb+srv://Gestionpymongo:Gestionpymongo@cluster0.iixvr.mongodb.net"
                                      "/Gestiondb?retryWrites=true&w=majority")
         mydb = client["Gestiondb"]
-        mycol = mydb["Persona"]
+        mycol = mydb["People"]
         query = {"_id": _id}
         mydoc = mycol.find_one(query)
         self._id = mydoc.get("_id")
@@ -23,7 +18,7 @@ class Persona:
         client = pymongo.MongoClient("mongodb+srv://Gestionpymongo:Gestionpymongo@cluster0.iixvr.mongodb.net"
                                      "/Gestiondb?retryWrites=true&w=majority")
         mydb = client["Gestiondb"]
-        mycol = mydb["Persona"]
+        mycol = mydb["People"]
         mydict = {"_id": _id, "firstname": firstname, "lastname": lastname}
         mycol.insert_one(mydict)
         self._id = _id
@@ -43,7 +38,7 @@ class Persona:
         client = pymongo.MongoClient("mongodb+srv://Gestionpymongo:Gestionpymongo@cluster0.iixvr.mongodb.net"
                                      "/Gestiondb?retryWrites=true&w=majority")
         mydb = client["Gestiondb"]
-        mycol = mydb["Persona"]
+        mycol = mydb["People"]
         query = {"_id": self._id}
         mycol.delete_one(query)
         self._id = None
