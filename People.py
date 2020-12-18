@@ -3,14 +3,15 @@ from tkinter import ttk, messagebox
 import tkinter.font as tkFont
 import pymongo
 
+client = pymongo.MongoClient("mongodb+srv://Gestionpymongo:Gestionpymongo@cluster0.iixvr.mongodb.net"
+                                     "/Gestiondb?retryWrites=true&w=majority")
+mydb = client["Gestiondb"]
+seleccionado = -1
 
 class People:
 
     @staticmethod
     def tuplas_personas():
-        client = pymongo.MongoClient("mongodb+srv://Gestionpymongo:Gestionpymongo@cluster0.iixvr.mongodb.net"
-                                     "/Gestiondb?retryWrites=true&w=majority")
-        mydb = client["Gestiondb"]
         mycol = mydb["People"]
         mydoc = mycol.find()
         lista = []
@@ -33,9 +34,6 @@ class People:
 
     @staticmethod
     def lista_disponibles(_id):
-        client = pymongo.MongoClient("mongodb+srv://Gestionpymongo:Gestionpymongo@cluster0.iixvr.mongodb.net"
-                                     "/Gestiondb?retryWrites=true&w=majority")
-        mydb = client["Gestiondb"]
         mycol = mydb["People"]
         mydoc = mycol.find()
         conjunto = set()
@@ -49,18 +47,12 @@ class People:
         conjuntoamigos = Friends.conjunto_amigos(_id)
         conjuntodis = conjunto.difference(conjuntoamigos)
 
-
-
         #Quitamos a la misma persona
-
         listadispo = list(conjuntodis)
         listadispo.sort()
         return listadispo
 
     def __init__(self, _id):
-        client = pymongo.MongoClient("mongodb+srv://Gestionpymongo:Gestionpymongo@cluster0.iixvr.mongodb.net"
-                                     "/Gestiondb?retryWrites=true&w=majority")
-        mydb = client["Gestiondb"]
         mycol = mydb["People"]
 
         query = {"_id": _id}
@@ -95,9 +87,6 @@ class Friends:
 
     @staticmethod
     def conjunto_amigos(_id):
-        client = pymongo.MongoClient("mongodb+srv://Gestionpymongo:Gestionpymongo@cluster0.iixvr.mongodb.net"
-                                     "/Gestiondb?retryWrites=true&w=majority")
-        mydb = client["Gestiondb"]
         mycol = mydb["Friends"]
         query = {"$or": [{"_id1": _id}, {"_id2": _id}]}
         mydoc = mycol.find(query)
@@ -114,9 +103,6 @@ class Friends:
         return res
 
     def __init__(self, _id1, _id2):
-        client = pymongo.MongoClient("mongodb+srv://Gestionpymongo:Gestionpymongo@cluster0.iixvr.mongodb.net"
-                                     "/Gestiondb?retryWrites=true&w=majority")
-        mydb = client["Gestiondb"]
         mycol = mydb["Friends"]
 
         query = {"$or": [{"_id1": _id1, "_id2": _id2}, {"_id1": _id2, "_id2": _id1}]}
@@ -138,9 +124,6 @@ class Friends:
         return self._id2
 
     def delete(self):
-        client = pymongo.MongoClient("mongodb+srv://Gestionpymongo:Gestionpymongo@cluster0.iixvr.mongodb.net"
-                                     "/Gestiondb?retryWrites=true&w=majority")
-        mydb = client["Gestiondb"]
         mycol = mydb["Friends"]
         query = {"$or": [{"_id1": self._id1, "_id2": self._id2}, {"_id1": self._id2, "_id2": self._id1}]}
         mycol.delete_one(query)
@@ -198,22 +181,11 @@ class Table(tk.Frame):
                     self._tree.column(self._headers[i], width=col_width)
 
     def item_selected(self, event):
-        lAmigos.delete('0','end')
-        lDisponibles.delete('0','end')
         item = self._tree.selection()[0]
         tupla = self._tree.item(item, option="values")
-        index = int(tupla[0])
-        listaAmigos = People.lista_amigos(index)
-        listaDisponibles = People.lista_disponibles(index)
-
-        cont = 1
-        for x in listaAmigos:
-            lAmigos.insert(cont, x)
-            cont = cont+1
-        cont = 1
-        for y in listaDisponibles:
-            lDisponibles.insert(cont, y)
-            cont = cont+1
+        global seleccionado
+        seleccionado = int(tupla[0])
+        refresh()
 
 def insertFriend():
     try:
@@ -229,6 +201,8 @@ def insertFriend():
         #insertar en la bd si se han seleccionado
         if table_index is not None and dis_id is not None:
             Friends(table_index, dis_id)
+            refresh()
+
     except:
         messagebox.showwarning(message="No se ha seleccionado un usuario", title="Error")
 
@@ -247,8 +221,25 @@ def deleteFriend():
         if table_index is not None and amigos_id is not None:
             f = Friends(table_index, amigos_id)
             f.delete()
+            refresh()
     except:
         messagebox.showwarning(message="No se ha seleccionado un usuario", title="Error")
+
+def refresh():
+    lAmigos.delete('0', 'end')
+    lDisponibles.delete('0', 'end')
+    listaAmigos = People.lista_amigos(seleccionado)
+    listaDisponibles = People.lista_disponibles(seleccionado)
+
+    cont = 1
+    for x in listaAmigos:
+        lAmigos.insert(cont, x)
+        cont = cont + 1
+    cont = 1
+    for y in listaDisponibles:
+        lDisponibles.insert(cont, y)
+        cont = cont + 1
+
 
 
 root = tk.Tk()
