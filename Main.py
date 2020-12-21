@@ -23,6 +23,7 @@ class People:
             tupla = (id_person, firstname_person, lastname_person)
             lista.append(tupla)
 
+        lista.sort()
         return lista
 
     @staticmethod
